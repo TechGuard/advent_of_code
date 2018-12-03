@@ -2,12 +2,36 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io::{self, Read};
 
+extern crate regex;
+use regex::Regex;
+
+#[derive(Debug)]
 struct Claim {
     id: i32,
-    left: i32,
     top: i32,
+    left: i32,
     width: i32,
     height: i32,
+}
+
+fn parse_claims(input: &String) -> Result<Vec<Claim>, &'static str> {
+    let parse_error = Err("parse error");
+    let re =
+        Regex::new(r"^#(?P<id>\d+) @ (?P<left>\d+),(?P<top>\d+): (?P<width>\d+)x(?P<height>\d+)$")
+            .unwrap();
+    input
+        .lines()
+        .map(|line| {
+            let capture = re.captures(line).ok_or("invalid format")?;
+            Ok(Claim {
+                id: capture["id"].parse().or(parse_error)?,
+                top: capture["top"].parse().or(parse_error)?,
+                left: capture["left"].parse().or(parse_error)?,
+                width: capture["width"].parse().or(parse_error)?,
+                height: capture["height"].parse().or(parse_error)?,
+            })
+        })
+        .collect()
 }
 
 fn main() {
@@ -16,30 +40,7 @@ fn main() {
         .read_to_string(&mut input)
         .expect("Expected input");
 
-    // Parse claims
-    let claims: Vec<Claim> = input
-        .lines()
-        .map(|line: &str| {
-            let id: i32 = line[1..line.find(' ').unwrap()].parse().unwrap();
-            let left: i32 = line[line.find('@').unwrap() + 2..line.find(',').unwrap()]
-                .parse()
-                .unwrap();
-            let top: i32 = line[line.find(',').unwrap() + 1..line.find(':').unwrap()]
-                .parse()
-                .unwrap();
-            let width: i32 = line[line.find(':').unwrap() + 2..line.find('x').unwrap()]
-                .parse()
-                .unwrap();
-            let height: i32 = line[line.find('x').unwrap() + 1..].parse().unwrap();
-            Claim {
-                id,
-                left,
-                top,
-                width,
-                height,
-            }
-        })
-        .collect();
+    let claims = parse_claims(&input).unwrap();
 
     let mut potential = HashSet::<i32>::new();
     let mut fabric = HashMap::<i32, Vec<i32>>::new();
