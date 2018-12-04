@@ -10,7 +10,7 @@ extern crate regex;
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 use regex::Regex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 struct LogEntry {
     timestamp: NaiveDateTime,
     text: String,
@@ -57,35 +57,30 @@ fn main() {
         .unwrap();
 
     // Sort by timestamp
-    entries.sort_by(|a, b| a.timestamp.partial_cmp(&b.timestamp).unwrap());
+    entries.sort();
 
     let mut guards = HashMap::<u32, Vec<u32>>::new();
     let mut start_sleeping_at: Option<u32> = None;
     let mut curr_guard: Option<u32> = None;
 
+    // Parse entry logs
     for entry in &entries {
-        // Guard begins to sleep
-        if entry.text == "falls asleep" {
-            start_sleeping_at = Some(entry.timestamp.minute());
-            continue;
-        }
-
-        // Guard was asleep and woke up
-        if curr_guard.is_some() && start_sleeping_at.is_some() {
-            let begin = start_sleeping_at.unwrap();
-            let end = entry.timestamp.minute();
-            start_sleeping_at = None;
-
-            // Add sleeping hours to guard
-            guards
-                .entry(curr_guard.unwrap())
-                .or_default()
-                .extend(begin..end);
-        }
-
-        // New guard begins shift
-        if entry.text != "wakes up" {
-            curr_guard = Some(get_guard_id(&entry.text).unwrap());
+        match entry.text.as_str() {
+            "falls asleep" => start_sleeping_at = Some(entry.timestamp.minute()),
+            "wakes up" => match curr_guard {
+                None => panic!("wakes up without guard"),
+                Some(guard_id) => {
+                    // Add sleeping hours to guards map
+                    if let Some(begin) = start_sleeping_at {
+                        start_sleeping_at = None;
+                        guards
+                            .entry(guard_id)
+                            .or_default()
+                            .extend(begin..entry.timestamp.minute());
+                    }
+                }
+            },
+            s => curr_guard = Some(get_guard_id(s).unwrap()),
         }
     }
 
@@ -106,14 +101,14 @@ fn get_avg_mode<T: std::hash::Hash + Eq + Copy>(numbers: &[T]) -> AvgModeResult<
         *occurrences.entry(value).or_default() += 1;
     }
 
-    let result = occurrences
+    let (value, occurrence) = occurrences
         .into_iter()
         .max_by_key(|&(_, count)| count)
         .expect("Cannot compute the mode of zero numbers");
 
     AvgModeResult {
-        value: *result.0,
-        occurrence: result.1,
+        value: *value,
+        occurrence: occurrence,
     }
 }
 
