@@ -23,12 +23,9 @@ fn get_answer2(numbers: &Vec<i32>) -> i32 {
     loop {
         for number in numbers.iter() {
             freq += number;
-
-            if frequencies.contains(&freq) {
+            if frequencies.insert(freq) {
                 return freq;
             }
-
-            frequencies.insert(freq);
         }
     }
 }
