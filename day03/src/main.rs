@@ -1,7 +1,10 @@
+use core::str::FromStr;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io::{self, Read};
 
+#[macro_use]
+extern crate lazy_static;
 extern crate regex;
 use regex::Regex;
 
@@ -14,24 +17,24 @@ struct Claim {
     height: i32,
 }
 
-fn parse_claims(input: &String) -> Result<Vec<Claim>, &'static str> {
-    let parse_error = Err("parse error");
-    let re =
-        Regex::new(r"^#(?P<id>\d+) @ (?P<left>\d+),(?P<top>\d+): (?P<width>\d+)x(?P<height>\d+)$")
+impl FromStr for Claim {
+    type Err = std::num::ParseIntError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(
+                r"^#(?P<id>\d+) @ (?P<left>\d+),(?P<top>\d+): (?P<width>\d+)x(?P<height>\d+)$"
+            )
             .unwrap();
-    input
-        .lines()
-        .map(|line| {
-            let capture = re.captures(line).ok_or("invalid format")?;
-            Ok(Claim {
-                id: capture["id"].parse().or(parse_error)?,
-                top: capture["top"].parse().or(parse_error)?,
-                left: capture["left"].parse().or(parse_error)?,
-                width: capture["width"].parse().or(parse_error)?,
-                height: capture["height"].parse().or(parse_error)?,
-            })
+        }
+        let capture = RE.captures(s).unwrap();
+        Ok(Claim {
+            id: capture["id"].parse()?,
+            top: capture["top"].parse()?,
+            left: capture["left"].parse()?,
+            width: capture["width"].parse()?,
+            height: capture["height"].parse()?,
         })
-        .collect()
+    }
 }
 
 fn main() {
@@ -40,10 +43,14 @@ fn main() {
         .read_to_string(&mut input)
         .expect("Expected input");
 
-    let claims = parse_claims(&input).unwrap();
+    let claims = input
+        .lines()
+        .map(Claim::from_str)
+        .collect::<Result<Vec<Claim>, _>>()
+        .unwrap();
 
-    let mut potential = HashSet::<i32>::new();
-    let mut fabric = HashMap::<i32, Vec<i32>>::new();
+    let mut potential = HashSet::new();
+    let mut fabric = HashMap::<_, Vec<_>>::new();
 
     // Fill fabric
     claims.iter().for_each(|claim: &Claim| {
