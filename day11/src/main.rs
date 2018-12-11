@@ -11,38 +11,32 @@ fn main() {
 
     let serial = input.parse::<i32>().unwrap();
 
-    // Calculate power
-    let mut data = vec![0; WIDTH * HEIGHT];
-    for y in 0..HEIGHT {
-        for x in 0..WIDTH {
-            let rack_id = x as i32 + 11;
-            let mut power = rack_id * (y as i32 + 1);
+    // Calculate power and build integral image
+    // https://en.wikipedia.org/wiki/Summed-area_table
+    let mut data = vec![vec![0; WIDTH + 1]; HEIGHT + 1];
+    for y in 1..HEIGHT + 1 {
+        for x in 1..WIDTH + 1 {
+            let rack_id = x as i32 + 10;
+            let mut power = rack_id * (y as i32);
             power += serial;
             power *= rack_id;
             power = (power / 100) % 10;
             power -= 5;
-            data[y * WIDTH + x] = power;
+            data[y][x] = power + data[y - 1][x] + data[y][x - 1] - data[y - 1][x - 1];
         }
     }
 
-    let mut answer_1 = None;
-
     let mut max_total = 0;
     let mut best_cell = None;
-    let mut cache = vec![0; WIDTH * HEIGHT];
+    let mut answer_1 = None;
 
+    // Check every cell_size
     for cell_size in 1..WIDTH + 1 {
-        if let Some(cell) = find_best_cell(&data, &mut cache, cell_size) {
+        if let Some(cell) = find_best_cell(&data, cell_size) {
             // Store 1st answer
             if cell_size == 3 {
                 answer_1 = Some(cell.clone());
             }
-
-            // Stop searching if total is lower than zero
-            if cell.total < 0 {
-                break;
-            }
-
             // Check best total
             if cell.total >= max_total {
                 max_total = cell.total;
@@ -69,26 +63,15 @@ struct Cell {
     total: i32,
 }
 
-fn find_best_cell(data: &Vec<i32>, cache: &mut Vec<i32>, cell_size: usize) -> Option<Cell> {
+fn find_best_cell(data: &Vec<Vec<i32>>, cell_size: usize) -> Option<Cell> {
     let mut max_total = std::i32::MIN;
     let mut best_cell = None;
 
-    for y in 0..HEIGHT - (cell_size - 1) {
-        for x in 0..WIDTH - (cell_size - 1) {
-            // Assume last cache was cell_size - 1
-            let mut total = cache[y * WIDTH + x];
-
-            // Add one row
-            for xoff in 0..cell_size {
-                total += data[(y + cell_size - 1) * WIDTH + (x + xoff)];
-            }
-            // Add one column (without corner)
-            for yoff in 0..cell_size - 1 {
-                total += data[(y + yoff) * WIDTH + (x + cell_size - 1)];
-            }
-
-            // Save to cache
-            cache[y * WIDTH + x] = total;
+    for y in 1..HEIGHT - cell_size {
+        for x in 1..WIDTH - cell_size {
+            let total = data[y + cell_size][x + cell_size] + data[y][x]
+                - data[y][x + cell_size]
+                - data[y + cell_size][x];
 
             // Check best total
             if total > max_total {
