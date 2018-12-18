@@ -159,19 +159,24 @@ fn main() {
     }
 
     // Print
-    for y in min_y..10 {
-        for x in min_x..max_x + 1 {
-            let c: char = map.get(&(x, y)).unwrap_or(&Material::Sand).into();
-            print!("{}", c);
-        }
-        println!();
-    }
+    // for y in min_y..10 {
+    //     for x in min_x..max_x + 1 {
+    //         let c: char = map.get(&(x, y)).unwrap_or(&Material::Sand).into();
+    //         print!("{}", c);
+    //     }
+    //     println!();
+    // }
 
-    let total = map
-        .iter()
-        .filter(|&(_, m)| m == &Material::StillWater || m == &Material::Water)
-        .count();
-
-    println!("{},{} x {},{}", min_x, min_y, max_x, max_y);
-    println!("1st answer = {}", total);
+    println!(
+        "1st answer = {}",
+        map.iter()
+            .filter(|&(_, m)| m == &Material::StillWater || m == &Material::Water)
+            .count()
+    );
+    println!(
+        "2nd answer = {}",
+        map.iter()
+            .filter(|&(_, m)| m == &Material::StillWater)
+            .count()
+    );
 }
