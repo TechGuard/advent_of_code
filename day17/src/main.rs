@@ -5,7 +5,6 @@ extern crate regex;
 use regex::Regex;
 
 const SPRING_X: i32 = 500;
-const SPRING_Y: i32 = 0;
 
 #[derive(Debug, PartialEq)]
 enum Material {
@@ -13,7 +12,6 @@ enum Material {
     Sand,
     Water,
     StillWater,
-    Spring,
 }
 
 impl From<&Material> for char {
@@ -23,7 +21,6 @@ impl From<&Material> for char {
             Material::Sand => '.',
             Material::Water => '|',
             Material::StillWater => '~',
-            Material::Spring => '+',
         }
     }
 }
@@ -32,7 +29,6 @@ type MaterialMap = HashMap<(i32, i32), Material>;
 
 fn parse_input(s: &str) -> MaterialMap {
     let mut map = HashMap::new();
-    map.entry((SPRING_X, SPRING_Y)).or_insert(Material::Spring);
 
     let re =
         Regex::new(r"^(?P<axis>x|y)=(?P<value>\d+), (x|y)=(?P<min>\d+)\.\.(?P<max>\d+)$").unwrap();
@@ -76,7 +72,7 @@ fn main() {
 
     loop {
         let mut x = SPRING_X;
-        let mut y = SPRING_Y;
+        let mut y = min_y;
         let mut check_left = None;
         let mut material = Material::Water;
 
@@ -157,13 +153,13 @@ fn main() {
         map.insert((x, y), material);
 
         // Cannot fill any more water
-        if x == SPRING_X && y == SPRING_Y + 1 {
+        if x == SPRING_X && y == min_y {
             break;
         }
     }
 
     // Print
-    for y in min_y..max_y + 1 {
+    for y in min_y..10 {
         for x in min_x..max_x + 1 {
             let c: char = map.get(&(x, y)).unwrap_or(&Material::Sand).into();
             print!("{}", c);
