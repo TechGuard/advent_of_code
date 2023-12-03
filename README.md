@@ -7,8 +7,11 @@
 
 ### Usage
 ```
-advent_of_code [day]
+advent_of_code [-e] [day]
 
 positional arguments:
-  day         optional. Uses latest day by default
+  day            optional. Uses latest day by default
+
+optional arguments:
+  -e, --example  Run with example input
 ```
