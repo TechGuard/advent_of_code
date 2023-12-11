@@ -34,6 +34,12 @@ class Node:
         if self.type == 'S': return [(y-1,x),(y,x+1),(y+1,x),(y,x-1)]
         return []
 
+    def next(self):
+        for neighbor in self.neighbors:
+            if neighbor.visit():
+                return neighbor
+        return None
+    
     def visit(self):
         if self.visited:
             return False
@@ -71,41 +77,25 @@ def part_1(input):
 # https://math.stackexchange.com/questions/960686/properties-of-area-of-simple-polygon-with-integer-coordinates
 def part_2(input):
     start = process_input(input)
-    
-    cur_node = start
-    next_node = start.neighbors[0]
-    cur_node.visit()
-    next_node.visit()
-    dir = (next_node.pos[0]-cur_node.pos[0], next_node.pos[1]-cur_node.pos[1])
 
-    thinking = True
-    points = [cur_node.pos]
-    num_points = 1
-    while thinking:
-        thinking = False
-        for neighbor in next_node.neighbors:
-            if neighbor.visit():
-                thinking = True
-                next_dir = (neighbor.pos[0]-next_node.pos[0], neighbor.pos[1]-next_node.pos[1])
-                num_points += 1
-                if dir == next_dir:
-                    next_node = neighbor
-                else:
-                    points.append(next_node.pos)
-                    cur_node = next_node
-                    next_node = neighbor
-                    dir = next_dir
-                break
-    num_points += 1
+    node = start
+    node.visit()
+    total_points = 1
+    edge_points = [node.pos]
+    while node:
+        node = node.next()
+        total_points += 1
+        if node and node.type not in ['|', '-']:
+            edge_points.append(node.pos)
     
     def area_by_shoelace(x, y):
         return abs( sum(i * j for i, j in zip(x,             y[1:] + y[:1]))
-               -sum(i * j for i, j in zip(x[1:] + x[:1], y            ))) / 2
-    x, y = zip(*points)
-    area = area_by_shoelace(x, y)
+                   -sum(i * j for i, j in zip(x[1:] + x[:1], y            ))) / 2
+    area = area_by_shoelace(*zip(*edge_points))
 
     # Pick's theorem
-    return int((area-(num_points/2-1)) + 0.5)
+    return int((area - (total_points/2-1)) + 0.5)
+
 
 # Keeping this for for your ejoyment to see my madness
 # def part_2(input):
