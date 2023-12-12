@@ -6,45 +6,35 @@ EXAMPLE_INPUT = '''???.### 1,1,3
 ?###???????? 3,2,1
 '''
 
-import re
 
 def solve(springs, sizes):
-    def validate(lsprings):
-        last = '.'
-        count = 0
-        test_sizes = sizes.copy()
-        for c in lsprings + ['.']:
-            if c == '#':
-                if last == '.':
-                    count = 1
-                else:
-                    count += 1
+    cache = {}
+
+    def cached(f, springs, sizes, count):
+        key = springs + ''.join([str(x) for x in sizes]) + str(count)
+        if key not in cache:
+            cache[key] = f(springs, sizes, count)
+        return cache[key]
+    
+    def f(springs, sizes, count):
+        for i, c in enumerate(springs):
             if c == '.':
-                if last == '#':
-                    if not test_sizes or count != test_sizes[0]:
-                        return False
-                    test_sizes = test_sizes[1:]
-            last = c
-        if test_sizes:
-            return False
-        return True
-
-    # bruteforce
-    def f(_lsprings, matches, cb):
-        lsprings = _lsprings.copy()
-        arrangements = 0
-        if len(matches):
-            for c in ['#', '.']:
-                m = matches[0]
-                lsprings[m.start()] = c
-                arrangements += f(lsprings, matches[1:], cb)
-        else:
-            if cb(lsprings):
-                arrangements += 1
-        return arrangements
-
-    matches = list(re.finditer(r'\?', springs))
-    return f(list(springs), matches, validate)
+                if not count:
+                    continue
+                if not sizes or count != sizes[0]:
+                    return 0
+                sizes = sizes[1:]
+                count = 0
+            if c == '#':
+                count += 1
+                if not sizes or count > sizes[0]:
+                    return 0
+            if c == '?':
+                return cached(f, '.' + springs[i + 1:], sizes, count) + cached(f, '#' + springs[i + 1:], sizes, count)
+            
+        return 0 if sizes else 1
+    
+    return f(springs + '.', sizes, 0)
 
 
 def part_1(input):
@@ -63,7 +53,7 @@ def part_2(input):
         springs, sizes = line.split(' ')
         sizes = [int(x) for x in sizes.split(',')]
 
-        springs = (springs+'?') * 4 + springs
+        springs = (springs + '?') * 4 + springs
         sizes = sizes * 5
 
         result += solve(springs, sizes)
