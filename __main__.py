@@ -77,17 +77,24 @@ else:
     if not os.path.exists(input_filename):
         print('Downloading input ...')
 
-        with open('.session_token', 'r') as f:
-            session_token = f.read()
+        session_token = ''
+        if os.path.exists('.session_token'):
+            with open('.session_token', 'r') as f:
+                session_token = f.read()
 
-        if len(session_token) == 0:
+        if not session_token:
             print('Please enter your session cookie into the .session_token file')
             exit(1)
 
-        with open(input_filename, 'wb') as f:
-            url = 'https://adventofcode.com/{}/day/{}/input'.format(AOC_YEAR, args.day)
-            for line in urlopen(Request(url, headers={'Cookie': 'session={}'.format(session_token)})):
-                f.write(line)
+        try:
+            with open(input_filename, 'wb') as f:
+                url = 'https://adventofcode.com/{}/day/{}/input'.format(AOC_YEAR, args.day)
+                for line in urlopen(Request(url, headers={'Cookie': 'session={}'.format(session_token)})):
+                    f.write(line)
+        except Exception as ex:
+            os.remove(input_filename)
+            print(ex)
+            exit(1)
 
     with open(input_filename, 'r') as f:
         input = f.read()
