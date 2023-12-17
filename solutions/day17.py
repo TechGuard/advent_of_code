@@ -13,6 +13,8 @@ EXAMPLE_INPUT = '''2413432311323
 4322674655533
 '''
 
+from heapq import heapify, heappop, heappush
+
 DIR = {'^': (-1, 0), '>': (0, 1), 'v': (1, 0), '<': (0, -1)}
 DIR_OPPOSITE = {'^': 'v', '>': '<', 'v': '^', '<': '>'}
 
@@ -22,11 +24,11 @@ def solve(input, min, max):
     width = len(input[0])
     
     queue = [(0, '>', 1, (0, 0)), (0, 'v', 1, (0, 0))]
+    heapify(queue)
     visited = set()
 
     while queue:
-        queue.sort(reverse=True)
-        (cDist, cDir, cDirLength, current) = queue.pop()
+        (cDist, cDir, cDirLength, current) = heappop(queue)
         if (cDir, cDirLength, current) in visited:
             continue
         visited.add((cDir, cDirLength, current))
@@ -46,9 +48,10 @@ def solve(input, min, max):
                 continue
             nDist = cDist + int(input[y][x])
             dirLength = 1 if dir != cDir else cDirLength + 1
+            next = (nDist, dir, dirLength, (y, x))
             if (y, x) == (height-1, width-1) and dirLength >= min:
-                return nDist
-            queue.append((nDist, dir, dirLength, (y, x)))
+                return next[0]
+            heappush(queue, next)
 
 
 def part_1(input):
