@@ -25,14 +25,11 @@ def solve(input, min, max):
     
     queue = [(0, '>', 1, (0, 0)), (0, 'v', 1, (0, 0))]
     heapify(queue)
-    visited = set()
+    visited = {}
 
     while queue:
-        (cDist, cDir, cDirLength, current) = heappop(queue)
-        if (cDir, cDirLength, current) in visited:
-            continue
-        visited.add((cDir, cDirLength, current))
-
+        current = heappop(queue)
+        (cDist, cDir, cDirLength, pos) = current
         for dir in '^>v<':
             if cDirLength < min and cDir != dir:
                 continue
@@ -40,7 +37,7 @@ def solve(input, min, max):
                 continue
             if DIR_OPPOSITE[cDir] == dir:
                 continue
-            (y, x) = current
+            (y, x) = pos
             (offy, offx) = DIR[dir]
             y += offy
             x += offx
@@ -48,15 +45,36 @@ def solve(input, min, max):
                 continue
             nDist = cDist + int(input[y][x])
             dirLength = 1 if dir != cDir else cDirLength + 1
-            next = (nDist, dir, dirLength, (y, x))
+            next = (dir, dirLength, (y, x))
+            if next in visited:
+                continue
+            visited[next] = current
             if (y, x) == (height-1, width-1) and dirLength >= min:
-                return next[0]
-            heappush(queue, next)
+                return (nDist, *next), visited
+            heappush(queue, (nDist, *next))
+
+
+def print_map(result, visited):
+    size = max(max([y for (_,_,(y,_)) in visited]), max([x for (_,_,(_,x)) in visited])) + 1
+    lines = [['.' for _ in range(size)] for _ in range(size)]
+
+    while result:
+        (_, dir, length, (y, x)) = result
+        lines[y][x] = dir
+        result = visited.get((dir, length, (y, x)))
+
+    print()
+    for line in lines:
+        print(''.join(line))
 
 
 def part_1(input):
-    return solve(input, 1, 3)
+    result, visited = solve(input, 1, 3)
+    print_map(result, visited)
+    return result[0]
 
 
 def part_2(input):
-    return solve(input, 4, 10)
+    result, visited = solve(input, 4, 10)
+    print_map(result, visited)
+    return result[0]
