@@ -1,9 +1,3 @@
-# EXAMPLE_INPUT = r'''broadcaster -> a, b, c
-# %a -> b
-# %b -> c
-# %c -> inv
-# &inv -> a
-# '''
 EXAMPLE_INPUT = r'''broadcaster -> a
 %a -> inv, con
 &inv -> b
@@ -11,6 +5,8 @@ EXAMPLE_INPUT = r'''broadcaster -> a
 &con -> rx
 '''
 
+import itertools
+from math import lcm
 
 def parse_input(input):
     modules = {
@@ -38,61 +34,51 @@ def parse_input(input):
     return modules
 
 
+def update_modules(modules, cb):
+    process = [('broadcaster', 'button', False)]
+    while process:
+        (module, prev, val) = process.pop(0)
+        (type, state, dest, _) = modules[module]
+        cb(module, prev, val)
+
+        if type == '%':
+            if val:
+                continue
+            state['v'] = not state['v']
+            val = state['v']
+
+        elif type == '&':
+            state[prev] = val
+            val = not all(state.values())
+
+        for next in dest:
+            process.append((next, module, val))
+
+
 def part_1(input):
     modules = parse_input(input)
     result = [0, 0]
-
+    
     for _ in range(1000):
-        process = [('broadcaster', 'button', False)]
-        while process:
-            (module, prev, val) = process.pop(0)
-            (type, state, dest, _) = modules[module]
+        def f(module, prev, val):
             result[val] += 1
-
-            if type == '%':
-                if val:
-                    continue
-                state['v'] = not state['v']
-                val = state['v']
-
-            elif type == '&':
-                state[prev] = val
-                val = not all(state.values())
-
-            for next in dest:
-                process.append((next, module, val))
-
+        update_modules(modules, f)
+        
     return result[0] * result[1]
 
 
 def part_2(input):
     modules = parse_input(input)
-    return
-    
-    # def f(seen, module):
-    #     (type, state, dest, input) = modules[module]
-    #     if module in seen:
-    #         print('loop', seen, module)
-    #         return
-    #     if not input:
-    #         print(seen, module)
-    #     for prev in input:
-    #         f(seen + [module], prev)
-    # f([], 'rx')
+    target = modules['rx'][3][0]
+    targets = modules[target][3]
+    results = []
 
-    '''
-    broadcaster -> a
-    %a -> inv, con
-    &inv -> b
-    %b -> con
-    &con -> output
-
-    output
-      con
-        b
-          inv
-            a
-              broadcaster
-        a
-          broadcaster
-    '''
+    for i in itertools.count():
+        def f(module, prev, val):
+            if module == target and prev in targets and val:
+                results.append(i + 1)
+        update_modules(modules, f)
+        if len(targets) == len(results):
+            break
+        
+    return lcm(*results)
