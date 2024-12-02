@@ -46,8 +46,8 @@ parser.add_argument('-e', '--example', help='Run with example input', action='st
 args = parser.parse_args()
 
 if args.day is None:
-    last_day = next(iter(sorted(glob.glob('solutions/day[0-9][0-9].py'))), None)
-    args.day = int(os.path.basename(last_day)[3:-3]) if last_day else 1
+    last_day = sorted(glob.glob('solutions/day[0-9][0-9].py'))
+    args.day = int(os.path.basename(last_day[-1])[3:-3]) if len(last_day) else 1
 
 day_filename = os.path.join('solutions', 'day{:>02}.py'.format(args.day))
 if not os.path.exists(day_filename):
