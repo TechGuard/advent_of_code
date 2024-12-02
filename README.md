@@ -1,7 +1,7 @@
-# advent_of_code_2023
+# advent_of_code_2024
 
 ### Getting started
-1. Goto https://adventofcode.com/2023
+1. Goto https://adventofcode.com/2024
 2. Get your session cookie and add it to `.session_token`
 3. Run `advent_of_code.bat`
 
