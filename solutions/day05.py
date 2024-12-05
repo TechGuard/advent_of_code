@@ -28,8 +28,6 @@ EXAMPLE_INPUT = '''47|53
 97,13,75,29,47
 '''
 
-from functools import cmp_to_key
-
 
 def parse_input(input):
     rules, updates = input.split('\n\n')
