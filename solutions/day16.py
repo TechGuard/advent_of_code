@@ -38,12 +38,13 @@ def solve(input):
     while queue:
         current = heappop(queue)
         score, dir, pos = current
-        if (dir, pos) in visited and visited[(dir, pos)] < score:
+        if (dir, pos) in visited:
             continue
         visited[(dir, pos)] = score
 
-        if pos == end and result is None:
+        if pos == end:
             result = (dir, pos)
+            break
 
         # move forward
         off_y, off_x = DIR[dir]
