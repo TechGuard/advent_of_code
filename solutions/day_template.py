@@ -1,4 +1,4 @@
-EXAMPLE_INPUT = '''
+EXAMPLE_INPUT = '''\
 '''
 
 
