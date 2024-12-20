@@ -60,31 +60,17 @@ def solve(input, cheat_time):
 
     # for each position along the best path
     for start_pos in best_path:
-        queue = [(0, start_pos)]
-        heapify(queue)
-        visited = set()
-
-        while queue:
-            time, pos = heappop(queue)
-            if pos in visited:
-                continue
-            visited.add(pos)
-
-            # if position is a valid path, calculate the distance skipped
-            if pos in path_dist:
-                cheat_save = path_dist[pos] - (path_dist[start_pos] + time)
-                if cheat_save >= 100:
-                    result += 1
-
-            # cannot cheat any longer
-            if time == cheat_time:
-                continue
-
-            # find next cheat position
-            for off_y, off_x in DIR:
-                y, x = pos[0] + off_y, pos[1] + off_x
-                if 0 <= y < SIZE and 0 <= x < SIZE:
-                    heappush(queue, (time + 1, (y, x)))
+        # search in a radius of cheat_time
+        for off_y in range(-cheat_time, cheat_time + 1):
+            for off_x in range(-cheat_time, cheat_time + 1):
+                time = abs(off_y) + abs(off_x)
+                if time <= cheat_time:
+                    # if the cheat position is valid, calculate the distance skipped
+                    pos = (start_pos[0] + off_y, start_pos[1] + off_x)
+                    if pos in path_dist:
+                        cheat_save = path_dist[pos] - (path_dist[start_pos] + time)
+                        if cheat_save >= 100:
+                            result += 1
 
     return result
 
