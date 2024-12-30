@@ -1,0 +1,4 @@
+Release/
+Debug/
+*.vcxproj.user
+input.txt
