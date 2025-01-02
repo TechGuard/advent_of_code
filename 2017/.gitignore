@@ -1,4 +1,5 @@
 Release/
 Debug/
+.vs/
 *.vcxproj.user
 input.txt
