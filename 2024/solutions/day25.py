@@ -62,7 +62,3 @@ def part_1(input):
                 result += 1
 
     return result
-
-
-def part_2(input):
-    return

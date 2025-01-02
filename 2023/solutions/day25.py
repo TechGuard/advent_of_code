@@ -27,7 +27,3 @@ def part_1(input):
         cut, partition = networkx.minimum_cut(g, a, b)
         if cut == 3:
             return len(partition[0])*len(partition[1])
- 
-
-def part_2(input):
-    return

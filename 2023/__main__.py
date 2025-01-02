@@ -1,13 +1,9 @@
 import os
 import sys
-import glob
 import string
 import secrets
 import argparse
-from urllib.request import urlopen, Request
 import importlib.util
-
-AOC_YEAR = 2023
 
 def gensym(length=32, prefix="gensym_"):
     """
@@ -41,13 +37,9 @@ def load_module(source, module_name=None):
     return module
 
 parser = argparse.ArgumentParser(prog='advent_of_code')
-parser.add_argument('day', help='optional. Uses latest day by default', nargs='?', type=int)
+parser.add_argument('day', type=int)
 parser.add_argument('-e', '--example', help='Run with example input', action='store_true')
 args = parser.parse_args()
-
-if args.day is None:
-    last_day = sorted(glob.glob('solutions/day[0-9][0-9].py'))[-1]
-    args.day = int(os.path.basename(last_day)[3:-3])
 
 day_filename = os.path.join('solutions', 'day{:>02}.py'.format(args.day))
 if not os.path.exists(day_filename):
@@ -55,14 +47,6 @@ if not os.path.exists(day_filename):
     exit(1)
 
 day_module = load_module(day_filename)
-if not hasattr(day_module, 'part_1') or not callable(day_module.part_1):
-    print('Missing function in {}: `def part_1(input)`'.format(day_filename))
-    exit(1)
-if not hasattr(day_module, 'part_2') or not callable(day_module.part_2):
-    print('Missing function in {}: `def part_2(input)`'.format(day_filename))
-    exit(1)
-
-print(' >> advent_of_code_{} day {:>02} <<'.format(AOC_YEAR, args.day))
 
 if args.example:
     if not hasattr(day_module, 'EXAMPLE_INPUT') or not isinstance(day_module.EXAMPLE_INPUT, str):
@@ -70,37 +54,16 @@ if args.example:
         exit(1)
     input = day_module.EXAMPLE_INPUT
 else:
-    if not os.path.exists('.input'):
-        os.mkdir('.input')
+    input = sys.stdin.read()
 
-    input_filename = os.path.join('.input', 'input_{:>02}.txt'.format(args.day))
-    if not os.path.exists(input_filename):
-        print('Downloading input ...')
+print('Answer Part One: ', end='')
+if hasattr(day_module, 'part_1') and callable(day_module.part_1):
+    print('{}'.format(day_module.part_1(input)))
+else:
+    print('Not implemented')
 
-        session_token = ''
-        if os.path.exists('.session_token'):
-            with open('.session_token', 'r') as f:
-                session_token = f.read()
-
-        if not session_token:
-            print('Please enter your session cookie into the .session_token file')
-            exit(1)
-
-        try:
-            with open(input_filename, 'wb') as f:
-                url = 'https://adventofcode.com/{}/day/{}/input'.format(AOC_YEAR, args.day)
-                for line in urlopen(Request(url, headers={'Cookie': 'session={}'.format(session_token)})):
-                    f.write(line)
-        except Exception as ex:
-            os.remove(input_filename)
-            print(ex)
-            exit(1)
-
-    with open(input_filename, 'r') as f:
-        input = f.read()
-
-print('Answer part_1: ', end='')
-print('{}'.format(day_module.part_1(input)))
-
-print('Answer part_2: ', end='')
-print('{}'.format(day_module.part_2(input)))
+print('Answer Part Two: ', end='')
+if hasattr(day_module, 'part_2') and callable(day_module.part_2):
+    print('{}'.format(day_module.part_2(input)))
+else:
+    print('Not implemented')

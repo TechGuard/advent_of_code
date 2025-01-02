@@ -1,0 +1,12 @@
+[package]
+name = "aoc"
+version = "0.1.0"
+edition = "2021"
+description = "Downloads your Advent of Code input and executes the solution for the given year and day"
+
+[dependencies]
+clap = { version = "4.5.23", features = ["derive"] }
+glob = "0.3.2"
+html-escape = "0.2.13"
+reqwest = "0.12.12"
+tokio = { version = "1.42.0", features = ["rt", "macros"] }

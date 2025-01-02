@@ -6,20 +6,28 @@
     "configurations": [
         {
             "name": "example input",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "__main__.py",
             "console": "integratedTerminal",
-            "args": ["-e"],
+            "args": ["${input:day}", "-e"],
             "justMyCode": true
         },
         {
             "name": "real input",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "__main__.py",
             "console": "integratedTerminal",
+            "args": ["${input:day}", "<", "..\\.input\\2024\\${input:day}.txt"],
             "justMyCode": true
+        }
+    ],
+    "inputs": [
+        {
+            "id": "day",
+            "type": "promptString",
+            "description": "Select which day you want to debug"
         }
     ]
 }
