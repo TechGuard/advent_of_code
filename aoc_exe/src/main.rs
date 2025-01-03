@@ -18,6 +18,9 @@ struct Args {
     /// Run with example input
     #[arg(short, long, action(ArgAction::SetTrue))]
     example: bool,
+    /// Make solution file from a template
+    #[arg(short, long, action(ArgAction::SetTrue))]
+    make: bool,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -67,9 +70,18 @@ async fn main() {
                 args.day = find_highest_filename(year_dir.join("[0-9][0-9]*"), 0..2);
             }
         }
+
+        // Pick the next day if we're making a new solution
+        if args.make {
+            args.day = args.day.map(|x| x + 1);
+        }
     }
 
     let day = args.day.expect("DAY argument is missing");
+    if day < 1 || day > 25 {
+        eprintln!("Invalid advent day given: {}", day);
+        exit(1);
+    }
 
     // Create .input directory for this year
     let input_path = root_dir.join(".input").join(year.to_string());
@@ -79,19 +91,30 @@ async fn main() {
     let desc_text = download_description(year, day, input_path.join(format!("{day:02}.html")))
         .await
         .unwrap();
-    println!("--- Year {year} Day {day}: {} ---", parse_title(&desc_text));
+    let title = parse_title(&desc_text);
+    println!("--- Year {year} Day {day}: {} ---", title);
 
-    // Download input
-    let input_file = input_path.join(format!("{day:02}.txt"));
-    let input_bytes = download_input(year, day, root_dir, &input_file)
-        .await
-        .unwrap();
-
-    // Spawn child process and pipe input
+    let input_text;
     let mut proc_args = vec![format!("{day:02}")];
-    if args.example {
-        proc_args.push(String::from("--example"));
+
+    if args.make {
+        // Parse example input
+        input_text = parse_example(&desc_text).unwrap_or_default();
+        proc_args.push(String::from("--make"));
+        proc_args.push(title);
+    } else {
+        if args.example {
+            input_text = String::default();
+            proc_args.push(String::from("--example"));
+        } else {
+            // Download input
+            let input_file = input_path.join(format!("{day:02}.txt"));
+            input_text = download_input(year, day, root_dir, &input_file)
+                .await
+                .unwrap();
+        }
     }
+
     let mut proc = process::Command::new(year_dir.join("aoc.bat"))
         .current_dir(year_dir)
         .args(proc_args)
@@ -103,7 +126,7 @@ async fn main() {
     {
         let mut stdin = proc.stdin.take().expect("Failed to open stdin");
         stdin
-            .write_all(&input_bytes)
+            .write_all(input_text.as_bytes())
             .expect("Failed to write to stdin");
     }
     proc.wait().unwrap();
@@ -123,20 +146,11 @@ fn parse_title(desc_text: &str) -> String {
     title
 }
 
-// TODO: Might use this in the future while generating template code
-#[allow(dead_code)]
-fn parse_example(desc_text: &str) -> String {
+fn parse_example(desc_text: &str) -> Option<String> {
     // Find <pre><code> with preference of it appearing after "example:" text
     let example_begin = desc_text.find("example:").unwrap_or(0);
-    let example_begin = desc_text[example_begin..]
-        .find("<pre><code>")
-        .expect("Missing <pre><code> tag")
-        + example_begin
-        + 11;
-    let example_end = desc_text[example_begin..]
-        .find("</code></pre>")
-        .expect("Missing </code></pre> tag")
-        + example_begin;
+    let example_begin = desc_text[example_begin..].find("<pre><code>")? + example_begin + 11;
+    let example_end = desc_text[example_begin..].find("</code></pre>")? + example_begin;
 
     let mut example = String::new();
     html_escape::decode_html_entities_to_string(
@@ -148,7 +162,7 @@ fn parse_example(desc_text: &str) -> String {
     if example.contains("<em>") {
         example = example.replace("<em>", "").replace("</em>", "");
     }
-    example
+    Some(example)
 }
 
 async fn download_description(
@@ -177,10 +191,10 @@ async fn download_input(
     day: u32,
     root_dir: &Path,
     dest: &PathBuf,
-) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+) -> Result<String, Box<dyn std::error::Error>> {
     if dest.exists() {
-        let input_bytes = std::fs::read(dest)?;
-        return Ok(input_bytes);
+        let input_text = std::fs::read_to_string(dest)?;
+        return Ok(input_text);
     }
 
     println!("Downloading input...");
@@ -199,7 +213,7 @@ async fn download_input(
         .strip_prefix("session=")
         .expect(".env file should contain your session cookie: \"session=XXXX\"");
 
-    let input_bytes = reqwest::Client::new()
+    let input_text = reqwest::Client::new()
         .get(format!("https://adventofcode.com/{year}/day/{day}/input"))
         .header(
             reqwest::header::COOKIE,
@@ -207,11 +221,11 @@ async fn download_input(
         )
         .send()
         .await?
-        .bytes()
+        .text()
         .await?;
 
-    std::fs::write(dest, &input_bytes)?;
-    Ok(input_bytes.into())
+    std::fs::write(dest, &input_text)?;
+    Ok(input_text)
 }
 
 fn find_highest_filename(pattern: PathBuf, pattern_range: Range<usize>) -> Option<u32> {

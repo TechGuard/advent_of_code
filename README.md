@@ -21,5 +21,6 @@ Arguments:
 
 Options:
   -e, --example  Run with example input
+  -m, --make     Make solution file from a template
   -h, --help     Print help
 ```
