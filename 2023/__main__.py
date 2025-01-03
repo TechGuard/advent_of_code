@@ -6,6 +6,8 @@ import secrets
 import argparse
 import importlib.util
 
+sys.path.insert(0, 'libs')
+
 def gensym(length=32, prefix="gensym_"):
     """
     generates a fairly unique symbol, used to make a module name,
