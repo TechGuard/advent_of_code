@@ -1,4 +1,5 @@
-EXAMPLE_INPUT = '''##########
+EXAMPLE_INPUT = '''\
+##########
 #..O..O.O#
 #......O.#
 #.OO..O.O#

@@ -1,4 +1,5 @@
-EXAMPLE_INPUT = '''3   4
+EXAMPLE_INPUT = '''\
+3   4
 4   3
 2   5
 1   3
@@ -6,12 +7,14 @@ EXAMPLE_INPUT = '''3   4
 3   3
 '''
 
+
 def parse_input(input):
     left = [int(x) for x in input.split()[::2]]
     right = [int(x) for x in input.split()[1::2]]
     left.sort()
     right.sort()
     return (left, right)
+
 
 def part_1(input):
     left, right = parse_input(input)

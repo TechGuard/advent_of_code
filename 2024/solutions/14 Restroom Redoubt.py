@@ -1,4 +1,5 @@
-EXAMPLE_INPUT = '''p=0,4 v=3,-3
+EXAMPLE_INPUT = '''\
+p=0,4 v=3,-3
 p=6,3 v=-1,-3
 p=10,3 v=-1,2
 p=2,0 v=2,-1
