@@ -59,6 +59,8 @@ async fn main() {
         if year_dir.join("solutions").exists() {
             args.day =
                 find_highest_filename(year_dir.join("solutions").join("day[0-9][0-9]*"), 3..5);
+        } else if year_dir.join("src").exists() {
+            args.day = find_highest_filename(year_dir.join("src").join("day[0-9][0-9]*"), 3..5);
         } else {
             args.day = find_highest_filename(year_dir.join("day[0-9][0-9]*"), 3..5);
             if args.day.is_none() {
