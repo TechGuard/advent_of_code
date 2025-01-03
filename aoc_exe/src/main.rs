@@ -22,19 +22,24 @@ struct Args {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-    // Detect if we're running from project dir or root dir
-    let root_dir;
-    if std::env::current_dir().unwrap().file_name().unwrap() == "aoc_exe" {
-        root_dir = Path::new("..");
-    } else {
-        root_dir = Path::new(".");
-    }
-
     let mut args = Args::parse();
 
     // Swap year/day arguments if only one is provided and has a high value
     if args.day.is_none() && args.year < Some(100) {
         swap(&mut args.year, &mut args.day);
+    }
+
+    // Detect if we're running from project dir or root dir
+    let exe_path = std::env::current_exe().unwrap();
+    let mut root_dir = exe_path.parent().unwrap();
+    if root_dir.file_name().unwrap() == "debug" || root_dir.file_name().unwrap() == "release" {
+        root_dir = root_dir
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap();
     }
 
     if args.year.is_none() {
