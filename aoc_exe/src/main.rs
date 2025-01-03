@@ -59,15 +59,18 @@ async fn main() {
 
     if args.day.is_none() {
         // Detect different pattern types, because there are python/rust/c++ solutions that require different director
-        if year_dir.join("solutions").exists() {
-            args.day =
-                find_highest_filename(year_dir.join("solutions").join("day[0-9][0-9]*"), 3..5);
-        } else if year_dir.join("src").exists() {
-            args.day = find_highest_filename(year_dir.join("src").join("day[0-9][0-9]*"), 3..5);
-        } else {
-            args.day = find_highest_filename(year_dir.join("day[0-9][0-9]*"), 3..5);
-            if args.day.is_none() {
-                args.day = find_highest_filename(year_dir.join("[0-9][0-9]*"), 0..2);
+        for subdir in ["solutions", "src", ""] {
+            let subdir = year_dir.join(subdir);
+            if !subdir.exists() {
+                continue;
+            }
+            args.day = find_highest_filename(subdir.join("[0-9][0-9]*"), 0..2);
+            if args.day.is_some() {
+                break;
+            }
+            args.day = find_highest_filename(subdir.join("day[0-9][0-9]*"), 3..5);
+            if args.day.is_some() {
+                break;
             }
         }
 
@@ -92,7 +95,6 @@ async fn main() {
         .await
         .unwrap();
     let title = parse_title(&desc_text);
-    println!("--- Year {year} Day {day}: {} ---", title);
 
     let input_text;
     let mut proc_args = vec![format!("{day:02}")];
@@ -101,7 +103,7 @@ async fn main() {
         // Parse example input
         input_text = parse_example(&desc_text).unwrap_or_default();
         proc_args.push(String::from("--make"));
-        proc_args.push(title);
+        proc_args.push(title.clone());
     } else {
         if args.example {
             input_text = String::default();
@@ -114,6 +116,8 @@ async fn main() {
                 .unwrap();
         }
     }
+
+    println!("--- Year {year} Day {day}: {} ---", title);
 
     let mut proc = process::Command::new(year_dir.join("aoc.bat"))
         .current_dir(year_dir)
