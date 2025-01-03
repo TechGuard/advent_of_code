@@ -1,4 +1,5 @@
-EXAMPLE_INPUT = r'''broadcaster -> a
+EXAMPLE_INPUT = r'''\
+broadcaster -> a
 %a -> inv, con
 &inv -> b
 %b -> con

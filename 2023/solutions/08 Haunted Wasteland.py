@@ -1,4 +1,5 @@
-EXAMPLE_INPUT = '''RL
+EXAMPLE_INPUT = '''\
+RL
 
 AAA = (BBB, CCC)
 BBB = (DDD, EEE)

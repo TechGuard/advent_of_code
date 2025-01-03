@@ -1,5 +1,6 @@
 import os
 import sys
+import glob
 import string
 import secrets
 import argparse
@@ -41,11 +42,12 @@ parser.add_argument('day', type=int)
 parser.add_argument('-e', '--example', help='Run with example input', action='store_true')
 args = parser.parse_args()
 
-day_filename = os.path.join('solutions', 'day{:>02}.py'.format(args.day))
-if not os.path.exists(day_filename):
+day_filename = glob.glob(os.path.join('solutions', '{:>02}*.py'.format(args.day)))
+if len(day_filename) == 0:
     print('Day {:>02} is not implemented.'.format(args.day))
     exit(1)
 
+day_filename = day_filename[0]
 day_module = load_module(day_filename)
 
 if args.example:
