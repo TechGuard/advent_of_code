@@ -1,4 +1,6 @@
-!.vscode/launch.json
-.vscode/
 .input/
 .env
+
+**/.vscode/*
+!**/.vscode/launch.json
+vscode.bat
