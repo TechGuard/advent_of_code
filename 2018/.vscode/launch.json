@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "example input",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "target\\debug\\aoc_2018.exe",
+            "cwd": "${workspaceFolder}",
+            "args": ["${input:day}", "-e"],
+            "preLaunchTask": "rust: cargo build"
+        },
+        {
+            "name": "real input",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "target\\debug\\aoc_2018.exe",
+            "cwd": "${workspaceFolder}",
+            "args": ["${input:day}", "<", "..\\.input\\2018\\${input:day}.txt"],
+            "preLaunchTask": "rust: cargo build"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "day",
+            "type": "promptString",
+            "description": "Select which day you want to debug"
+        }
+    ]
+}
