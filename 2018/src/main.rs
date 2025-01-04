@@ -69,4 +69,5 @@ register_days!(
     day20_a_regular_map,
     day21_chronal_conversion,
     day22_mode_maze,
+    day23_experimental_emergency_teleportation,
 );
