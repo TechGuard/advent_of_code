@@ -13,7 +13,7 @@ Infection:
 
 const DEBUG: bool = false;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Army<'a> {
     #[allow(unused)]
     name: &'a str,
@@ -23,7 +23,7 @@ struct Army<'a> {
 #[derive(Debug, Clone, Copy)]
 struct GroupIndex(usize, usize);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Group<'a> {
     index: GroupIndex,
     unit_count: usize,
@@ -149,10 +149,15 @@ fn parse_input(input: &str) -> Option<Vec<Army>> {
     Some(armies)
 }
 
-pub fn main(input: &str) -> (usize, String) {
-    let mut armies = parse_input(input).unwrap();
+fn battle(mut armies: Vec<Army>, boost: usize) -> (usize, bool) {
+    // Boost immune system
+    for group in armies[0].groups.iter_mut() {
+        group.attack_damage += boost;
+    }
 
-    let ans1 = loop {
+    let mut last_count: Vec<usize> = armies.iter().map(|a| a.groups.len()).collect();
+
+    loop {
         if DEBUG {
             for army in armies.iter() {
                 println!("{}:", army.name);
@@ -218,9 +223,32 @@ pub fn main(input: &str) -> (usize, String) {
 
         // End battle if one army has no units
         if count.contains(&0) {
-            break count.iter().sum();
+            break (count.iter().sum(), count[0] > 0);
+        }
+
+        // End battle if there is a stalemate
+        if last_count == count {
+            break (count.iter().sum(), false);
+        } else {
+            last_count = count;
+        }
+    }
+}
+
+pub fn main(input: &str) -> (usize, usize) {
+    let armies = parse_input(input).unwrap();
+
+    let ans1 = battle(armies.clone(), 0).0;
+
+    let mut boost = 1;
+    let ans2 = loop {
+        let (ans, victory) = battle(armies.clone(), boost);
+        if victory {
+            break ans;
+        } else {
+            boost += 1;
         }
     };
 
-    (ans1, String::from("Not implemented"))
+    (ans1, ans2)
 }
