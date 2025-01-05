@@ -71,4 +71,5 @@ register_days!(
     day22_mode_maze,
     day23_experimental_emergency_teleportation,
     day24_immune_system_simulator_20xx,
+    day25_four_dimensional_adventure,
 );
