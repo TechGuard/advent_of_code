@@ -53,4 +53,5 @@ register_days!(
     day05_sunny_with_a_chance_of_asteroids,
     day06_universal_orbit_map,
     day07_amplification_circuit,
+    day08_space_image_format,
 );
