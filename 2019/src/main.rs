@@ -55,4 +55,5 @@ register_days!(
     day07_amplification_circuit,
     day08_space_image_format,
     day09_sensor_boost,
+    day10_monitoring_station,
 );
