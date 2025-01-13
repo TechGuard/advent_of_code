@@ -26,7 +26,7 @@ pub static EXAMPLE_INPUT: &str = "\
 ###.##.####.##.#..##
 ";
 
-pub fn main(input: &str) -> Result<(String, String)> {
+pub fn main(input: &str) -> Result<(i64, i64)> {
     let mut asteroids = input
         .lines()
         .enumerate()
@@ -106,5 +106,5 @@ pub fn main(input: &str) -> Result<(String, String)> {
         last_slope = slope;
     }
 
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }

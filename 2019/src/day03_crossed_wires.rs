@@ -8,7 +8,7 @@ R75,D30,R83,U83,L12,D49,R71,U7,L72
 U62,R66,U55,R34,D71,R55,D58,R83
 ";
 
-pub fn main(input: &str) -> Result<(String, String)> {
+pub fn main(input: &str) -> Result<(i64, i64)> {
     let mut wires = input.lines().map(|line| {
         line.split(",")
             .map(|s| {
@@ -47,8 +47,8 @@ pub fn main(input: &str) -> Result<(String, String)> {
         }
     });
     Ok((
-        intersections1.iter().min().unwrap().to_string(),
-        intersections2.iter().min().unwrap().to_string(),
+        *intersections1.iter().min().unwrap(),
+        *intersections2.iter().min().unwrap(),
     ))
 }
 

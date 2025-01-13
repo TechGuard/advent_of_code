@@ -4,7 +4,7 @@ use itertools::Itertools;
 pub static DAY: u32 = 08;
 pub static EXAMPLE_INPUT: &str = "0222112222120000";
 
-pub fn main(input: &str) -> Result<(String, String)> {
+pub fn main(input: &str) -> Result<(usize, String)> {
     let (width, height) = if input == EXAMPLE_INPUT {
         (2, 2)
     } else {
@@ -20,7 +20,7 @@ pub fn main(input: &str) -> Result<(String, String)> {
         .try_collect()?;
     let layers = layers.chunks(width * height).collect_vec();
 
-    Ok((ans1(&layers)?.to_string(), ans2(&layers, width)?))
+    Ok((ans1(&layers)?, ans2(&layers, width)?))
 }
 
 fn ans1(layers: &Vec<&[Pixel]>) -> Result<usize> {

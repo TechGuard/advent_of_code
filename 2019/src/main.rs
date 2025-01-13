@@ -1,12 +1,14 @@
 use anyhow::*;
 use std::io::Read;
 
+mod utils;
+
 macro_rules! register_days {
     ( $( $day:ident ), +$(,)* ) => {
         $(
             mod $day;
         )+
-        fn execute(day: u32, example: bool) -> Result<()> {
+        fn execute_day(day: u32, example: bool) -> Result<(String, String)> {
             $(
                 if $day::DAY == day {
                     let results;
@@ -19,8 +21,8 @@ macro_rules! register_days {
                             .context("Expected input")?;
                         results = $day::main(&input)?;
                     }
-                    println!("Answer Part One: {}\nAnswer Part Two: {}", results.0, results.1);
-                    return Ok(());
+                    // Convert answers to string
+                    return Ok((results.0.to_string(), results.1.to_string()));
                 }
             )+
             bail!("Day {:02} is not implemented", day)
@@ -42,7 +44,9 @@ fn main() -> Result<()> {
         example = arg1 == "--example" || arg1 == "-e";
     }
 
-    execute(day, example)
+    let (ans1, ans2) = execute_day(day, example)?;
+    println!("Answer Part One: {}\nAnswer Part Two: {}", ans1, ans2);
+    Ok(())
 }
 
 register_days!(

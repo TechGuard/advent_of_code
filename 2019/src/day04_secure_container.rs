@@ -4,7 +4,7 @@ use itertools::Itertools;
 pub static DAY: u32 = 04;
 pub static EXAMPLE_INPUT: &str = "0-999999";
 
-pub fn main(input: &str) -> Result<(String, String)> {
+pub fn main(input: &str) -> Result<(usize, usize)> {
     let mut range = input
         .lines()
         .next()
@@ -34,7 +34,7 @@ pub fn main(input: &str) -> Result<(String, String)> {
             ans1 += 1;
         }
     });
-    Ok((ans1.to_string(), ans2.to_string()))
+    Ok((ans1, ans2))
 }
 
 type Password = [u32; 6];

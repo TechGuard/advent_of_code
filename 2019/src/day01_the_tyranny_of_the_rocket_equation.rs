@@ -4,17 +4,14 @@ use itertools::Itertools;
 pub static DAY: u32 = 01;
 pub static EXAMPLE_INPUT: &str = "100756";
 
-pub fn main(input: &str) -> Result<(String, String)> {
+pub fn main(input: &str) -> Result<(i64, i64)> {
     let fuel: Vec<_> = input
         .lines()
         .map(|s| s.parse().map(calc_fuel))
         .try_collect()?;
     Ok((
-        fuel.iter().sum::<i64>().to_string(),
-        fuel.into_iter()
-            .map(calc_fuel_requirement)
-            .sum::<i64>()
-            .to_string(),
+        fuel.iter().sum(),
+        fuel.into_iter().map(calc_fuel_requirement).sum(),
     ))
 }
 

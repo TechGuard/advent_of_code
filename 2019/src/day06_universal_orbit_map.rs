@@ -18,8 +18,8 @@ K)YOU
 I)SAN
 ";
 
-pub fn main(input: &str) -> Result<(String, String)> {
-    let mut map = BTreeMap::new();
+pub fn main(input: &str) -> Result<(usize, usize)> {
+    let mut map: BTreeMap<&str, Object<'_>> = BTreeMap::new();
     for line in input.lines() {
         let mut pair = line.split(")");
         let lhs = pair.next().context("Invalid input")?;
@@ -37,7 +37,7 @@ pub fn main(input: &str) -> Result<(String, String)> {
         });
         child.parent = Some(lhs);
     }
-    Ok((ans1(&map)?.to_string(), ans2(&map)?.to_string()))
+    Ok((ans1(&map)?, ans2(&map)?))
 }
 
 fn ans1(map: &BTreeMap<&str, Object>) -> Result<usize> {
