@@ -60,4 +60,5 @@ register_days!(
     day08_space_image_format,
     day09_sensor_boost,
     day10_monitoring_station,
+    day11_space_police,
 );
