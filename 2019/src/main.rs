@@ -61,4 +61,5 @@ register_days!(
     day09_sensor_boost,
     day10_monitoring_station,
     day11_space_police,
+    day12_the_n_body_problem,
 );
