@@ -63,4 +63,5 @@ register_days!(
     day11_space_police,
     day12_the_n_body_problem,
     day13_care_package,
+    day14_space_stoichiometry,
 );
