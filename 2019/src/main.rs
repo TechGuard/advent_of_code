@@ -65,4 +65,5 @@ register_days!(
     day13_care_package,
     day14_space_stoichiometry,
     day15_oxygen_system,
+    day16_flawed_frequency_transmission,
 );
