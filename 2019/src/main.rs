@@ -64,4 +64,5 @@ register_days!(
     day12_the_n_body_problem,
     day13_care_package,
     day14_space_stoichiometry,
+    day15_oxygen_system,
 );
