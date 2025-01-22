@@ -66,4 +66,5 @@ register_days!(
     day14_space_stoichiometry,
     day15_oxygen_system,
     day16_flawed_frequency_transmission,
+    day17_set_and_forget,
 );
