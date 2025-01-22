@@ -44,8 +44,14 @@ fn main() -> Result<()> {
         example = arg1 == "--example" || arg1 == "-e";
     }
 
+    let measure = std::time::Instant::now();
     let (ans1, ans2) = execute_day(day, example)?;
-    println!("Answer Part One: {}\nAnswer Part Two: {}", ans1, ans2);
+    println!(
+        "Answer Part One: {}\nAnswer Part Two: {}\nElapsed time: {:.2?}",
+        ans1,
+        ans2,
+        measure.elapsed()
+    );
     Ok(())
 }
 
