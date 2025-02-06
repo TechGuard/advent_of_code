@@ -73,4 +73,5 @@ register_days!(
     day15_oxygen_system,
     day16_flawed_frequency_transmission,
     day17_set_and_forget,
+    day18_many_worlds_interpretation,
 );
