@@ -181,8 +181,7 @@ async fn download_description(
         println!("Downloading description...");
         text = reqwest::get(format!("https://adventofcode.com/{year}/day/{day}"))
             .await?
-            .error_for_status()
-            .unwrap()
+            .error_for_status()?
             .text()
             .await?;
         std::fs::write(dest, &text)?;
@@ -225,6 +224,7 @@ async fn download_input(
         )
         .send()
         .await?
+        .error_for_status()?
         .text()
         .await?;
 
