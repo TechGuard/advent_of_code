@@ -74,4 +74,5 @@ register_days!(
     day16_flawed_frequency_transmission,
     day17_set_and_forget,
     day18_many_worlds_interpretation,
+    day19_tractor_beam,
 );
