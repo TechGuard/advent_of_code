@@ -76,4 +76,5 @@ register_days!(
     day18_many_worlds_interpretation,
     day19_tractor_beam,
     day20_donut_maze,
+    day21_springdroid_adventure,
 );
