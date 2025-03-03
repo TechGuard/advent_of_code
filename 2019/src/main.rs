@@ -75,4 +75,5 @@ register_days!(
     day17_set_and_forget,
     day18_many_worlds_interpretation,
     day19_tractor_beam,
+    day20_donut_maze,
 );
