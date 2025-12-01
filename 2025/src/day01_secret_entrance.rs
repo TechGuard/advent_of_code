@@ -31,13 +31,9 @@ pub fn main(input: &str) -> Result<(i32, i32)> {
         let begin_at_zero = dial == 0;
         dial += dir * amount;
 
-        if dial <= 0 {
-            result2 += dial.abs() / 100;
-            if !begin_at_zero {
-                result2 += 1;
-            }
-        } else if dial > 99 {
-            result2 += dial / 100;
+        result2 += dial.abs() / 100;
+        if dial <= 0 && !begin_at_zero {
+            result2 += 1;
         }
 
         dial = dial.rem_euclid(100);
