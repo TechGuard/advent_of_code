@@ -24,8 +24,8 @@ with open(filepath, 'x') as f:
 with open(os.path.join('src', 'main.rs')) as f:
     main = f.read()
 
-last_comma = main.rfind(',\n') + 2
+last_comma = main.rfind(',') + 1
 if last_comma > 1:
-    main = main[:last_comma] + '    {},\n'.format(filename) + main[last_comma:]
+    main = main[:last_comma] + ' {},'.format(filename) + main[last_comma:]
     with open(os.path.join('src', 'main.rs'), 'w') as f:
         f.write(main)
