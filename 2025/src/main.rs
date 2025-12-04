@@ -53,4 +53,9 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-register_days!(day01_secret_entrance, day02_gift_shop, day03_lobby,);
+register_days!(
+    day01_secret_entrance,
+    day02_gift_shop,
+    day03_lobby,
+    day04_printing_department,
+);
