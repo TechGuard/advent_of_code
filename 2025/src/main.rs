@@ -58,4 +58,5 @@ register_days!(
     day02_gift_shop,
     day03_lobby,
     day04_printing_department,
+    day05_cafeteria,
 );
