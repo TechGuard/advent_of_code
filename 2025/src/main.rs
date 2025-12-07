@@ -60,4 +60,5 @@ register_days!(
     day04_printing_department,
     day05_cafeteria,
     day06_trash_compactor,
+    day07_laboratories,
 );
