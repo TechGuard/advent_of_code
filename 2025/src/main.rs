@@ -61,4 +61,5 @@ register_days!(
     day05_cafeteria,
     day06_trash_compactor,
     day07_laboratories,
+    day08_playground,
 );
