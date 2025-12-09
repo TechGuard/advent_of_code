@@ -6,7 +6,9 @@ use std::{
     ops::Range,
     path::{Path, PathBuf},
     process::{self, exit},
+    sync::Arc,
 };
+use tokio::task::JoinSet;
 
 #[derive(Parser)]
 #[command(about)]
@@ -21,6 +23,17 @@ struct Args {
     /// Make solution file from a template
     #[arg(short, long, action(ArgAction::SetTrue))]
     make: bool,
+    /// Run all solutions for a given year
+    #[arg(short, long, action(ArgAction::SetTrue))]
+    all: bool,
+}
+
+struct Day {
+    year: u32,
+    day: u32,
+    title: String,
+    input_text: String,
+    proc_args: Vec<String>,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -86,6 +99,31 @@ async fn main() {
         exit(1);
     }
 
+    let args = Arc::new(args);
+    let root_dir = Arc::new(root_dir.to_path_buf());
+
+    if args.all {
+        println!("Executing all days for {}\n", year);
+
+        let mut pending_days = JoinSet::new();
+        for day in 1..=day {
+            pending_days.spawn(prepare_day(year, day, args.clone(), root_dir.clone()));
+        }
+        let days = pending_days.join_all().await;
+
+        let measure = std::time::Instant::now();
+        for day in days {
+            execute_day(day, &year_dir);
+        }
+
+        println!("\nTotal elapsed time: {:.2?}", measure.elapsed());
+    } else {
+        let day = prepare_day(year, day, args, root_dir).await;
+        execute_day(day, &year_dir);
+    }
+}
+
+async fn prepare_day(year: u32, day: u32, args: Arc<Args>, root_dir: Arc<PathBuf>) -> Day {
     // Create .input directory for this year
     let input_path = root_dir.join(".input").join(year.to_string());
     std::fs::create_dir_all(&input_path).expect("Failed to create .input directory");
@@ -111,17 +149,27 @@ async fn main() {
         } else {
             // Download input
             let input_file = input_path.join(format!("{day:02}.txt"));
-            input_text = download_input(year, day, root_dir, &input_file)
+            input_text = download_input(year, day, &root_dir, &input_file)
                 .await
                 .unwrap();
         }
     }
 
-    println!("--- Year {year} Day {day}: {} ---", title);
+    Day {
+        year,
+        day,
+        title,
+        input_text,
+        proc_args,
+    }
+}
+
+fn execute_day(day: Day, year_dir: &Path) {
+    println!("--- Year {} Day {}: {} ---", day.year, day.day, day.title);
 
     let mut proc = process::Command::new(year_dir.join("aoc.bat"))
         .current_dir(year_dir)
-        .args(proc_args)
+        .args(day.proc_args)
         .stdin(process::Stdio::piped())
         .stdout(process::Stdio::inherit())
         .stderr(process::Stdio::inherit())
@@ -130,7 +178,7 @@ async fn main() {
     {
         let mut stdin = proc.stdin.take().expect("Failed to open stdin");
         stdin
-            .write_all(input_text.as_bytes())
+            .write_all(day.input_text.as_bytes())
             .expect("Failed to write to stdin");
     }
     proc.wait().unwrap();
