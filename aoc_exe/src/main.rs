@@ -109,7 +109,9 @@ async fn main() {
         for day in 1..=day {
             pending_days.spawn(prepare_day(year, day, args.clone(), root_dir.clone()));
         }
-        let days = pending_days.join_all().await;
+
+        let mut days = pending_days.join_all().await;
+        days.sort_by_key(|day| day.day);
 
         let measure = std::time::Instant::now();
         for day in days {
