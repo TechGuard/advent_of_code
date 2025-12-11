@@ -63,4 +63,5 @@ register_days!(
     day07_laboratories,
     day08_playground,
     day09_movie_theater,
+    day11_reactor,
 );
