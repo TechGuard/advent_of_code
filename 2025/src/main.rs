@@ -64,5 +64,5 @@ register_days!(
     day08_playground,
     day09_movie_theater,
     day10_factory,
-    day11_reactor,
+    day11_reactor, day12_christmas_tree_farm,
 );
