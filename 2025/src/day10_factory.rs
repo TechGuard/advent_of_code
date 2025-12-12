@@ -4,6 +4,7 @@ use std::{
     collections::{HashSet, VecDeque},
     vec,
 };
+use z3::{Optimize, ast::Int};
 
 pub static DAY: u32 = 10;
 pub static EXAMPLE_INPUT: &str = "\
@@ -15,15 +16,15 @@ pub static EXAMPLE_INPUT: &str = "\
 #[derive(Debug)]
 struct Machine {
     lights: Vec<bool>,
-    diagrams: Vec<Vec<usize>>,
+    buttons: Vec<Vec<usize>>,
     joltage: Vec<i64>,
 }
 
-pub fn main(input: &str) -> Result<(i64, String)> {
+pub fn main(input: &str) -> Result<(i64, i64)> {
     let machines = parse_input(input)?;
     Ok((
         machines.iter().map(|m| solve_lights(m)).sum(),
-        "Not implemented".into(), // machines.iter().map(|m| solve_joltage(m)).sum(),
+        machines.iter().map(|m| solve_joltage(m)).sum(),
     ))
 }
 
@@ -38,10 +39,10 @@ fn solve_lights(machine: &Machine) -> i64 {
             return result;
         }
 
-        for diagram in &machine.diagrams {
+        for button in &machine.buttons {
             let mut values = values.clone();
-            for &button in diagram {
-                values[button] = !values[button];
+            for &index in button {
+                values[index] = !values[index];
             }
             if seen.insert(values.clone()) {
                 queue.push_back((result + 1, values));
@@ -51,43 +52,63 @@ fn solve_lights(machine: &Machine) -> i64 {
     unreachable!("no answer")
 }
 
-// todo: part2
 fn solve_joltage(machine: &Machine) -> i64 {
-    println!("{:?}", machine);
+    /*
+        Example (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
 
-    let mut queue = VecDeque::new();
-    let mut seen = HashSet::new();
+        Each button affects a set of joltages
 
-    queue.push_back((Vec::new(), machine.joltage.clone()));
+          (3) = 0a + 0a + 0a + 1a
+        (1,3) = 0b + 1b + 0b + 1b
+          (2) = 0c + 0c + 1c + 0c
+        (2,3) = 0d + 0d + 1d + 1d
+        (0,2) = 1e + 0e + 1e + 0e
+        (0,1) = 1f + 1f + 0f + 0f
 
-    while let Some((result, values)) = queue.pop_front() {
-        if values.iter().all(|&x| x == 0) {
-            let counts = result.iter().counts();
-            for (k, v) in counts {
-                print!("{}{} ", "abcdefg".chars().nth(*k).unwrap(), v);
-            }
-            println!();
-            return result.len() as i64;
-        }
+        Each joltage is a sum of all buttons pressed that affect it
 
-        for diagram in &machine.diagrams {
-            let mut values = values.clone();
-            for &button in diagram {
-                values[button] -= 1;
-            }
+        3 = 1e + 2f
+        5 = 3b + 2f
+        4 = 3d + 1e
+        7 = 1a + 3b + 3d
+    */
 
-            if values.iter().any(|&value| value < 0) {
-                continue;
-            }
+    let solver = Optimize::new();
 
-            if seen.insert(values.clone()) {
-                let mut result = result.clone();
-                result.push(machine.diagrams.iter().position(|x| x == diagram).unwrap());
-                queue.push_back((result, values));
-            }
+    // Create button variables a..f
+    let buttons = (0..machine.buttons.len())
+        .map(|i| Int::new_const(format!("button{}", i)))
+        .collect_vec();
+
+    // Each button is greater or equal to 0
+    for button in &buttons {
+        solver.assert(&button.ge(0));
+    }
+
+    // For each joltage create a sum of all buttons that affects it
+    let mut joltage = vec![Int::from_i64(0); machine.joltage.len()];
+    for button in 0..machine.buttons.len() {
+        for index in machine.buttons[button].iter().cloned() {
+            joltage[index] += buttons[button].clone();
         }
     }
-    unreachable!("no answer")
+
+    // Assert that each joltage is equal to the expected outcome
+    for index in 0..machine.joltage.len() {
+        solver.assert(&joltage[index].eq(machine.joltage[index]));
+    }
+
+    // Solve for the smallest possible amount of buttons
+    solver.minimize(&Int::add(&buttons));
+    solver.check(&[]);
+
+    // The answer is the sum of all buttons
+    let model = solver.get_model().unwrap();
+    let mut answer = 0;
+    for button in buttons {
+        answer += model.get_const_interp(&button).unwrap().as_i64().unwrap();
+    }
+    answer
 }
 
 fn parse_input(input: &str) -> Result<Vec<Machine>> {
@@ -104,16 +125,16 @@ fn parse_input(input: &str) -> Result<Vec<Machine>> {
                 .map(|c| c == '#')
                 .collect();
 
-            let mut diagrams = Vec::new();
+            let mut buttons = Vec::new();
             while sections.peek().is_some_and(|str| str.starts_with('(')) {
-                let diagram = sections
+                let button = sections
                     .next()
-                    .context("missing diagrams")?
+                    .context("missing buttons")?
                     .trim_matches(['(', ')'])
                     .split(',')
                     .map(|str| Ok(str.parse()?))
                     .collect::<Result<_>>()?;
-                diagrams.push(diagram);
+                buttons.push(button);
             }
 
             let joltage = sections
@@ -126,7 +147,7 @@ fn parse_input(input: &str) -> Result<Vec<Machine>> {
 
             Ok(Machine {
                 lights,
-                diagrams,
+                buttons,
                 joltage,
             })
         })
